@@ -1,0 +1,4 @@
+Name: gv to svg
+Description: Create an svg file from a graphiviz gv file
+Binding: gvToSvgAddin
+Interactive: true
