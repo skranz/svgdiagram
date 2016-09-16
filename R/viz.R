@@ -65,7 +65,7 @@ make.viz.mem = memoise(make.viz.svg.org)
 #' @param to.clipboard copy SVG source code to cliboard
 #' @param out.file if not NULL save to outfile
 #' @export
-gv.to.svg = function(gv, use.memoise=TRUE, to.clipboard=is.null(out.file), out.file = NULL) {
+gv.to.svg = function(gv, use.memoise=TRUE, to.clipboard=is.null(out.file), out.file = NULL, adapt.latex=TRUE) {
   restore.point("gv.to.svg")
 
   # Check for a connection or file
@@ -84,12 +84,27 @@ gv.to.svg = function(gv, use.memoise=TRUE, to.clipboard=is.null(out.file), out.f
     svg = make.viz.org(gv)
   }
   Encoding(svg) = "UTF-8"
+  if (adapt.latex)
+    svg = adapt.svg.gv.latex(svg)
   if (!is.null(out.file))
     writeLines(svg, out.file,useBytes = TRUE)
   if (to.clipboard)
     writeClipboard(svg)
   if (!is.null(out.file)) return(invisible(svg))
   svg
+}
+
+adapt.svg.gv.latex = function(svg) {
+  restore.point("adapat.svg.gv.latex")
+  library(stringtools)
+  svg = sep.lines(svg)
+  lines = str.starts.with(svg,"<text ")
+  txt = svg[lines]
+  right = str.left.of(str.right.of(txt,">"),"</text>")
+  left = str.left.of(txt,">")
+  right =sapply(right,latex.to.textspan)
+  svg[lines] = paste0(left,">", right,"</text>")
+  merge.lines(svg)
 }
 
 gvToSvgAddin = function() {
